@@ -3,10 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
-	"strconv"
 	"net/http"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/streadway/amqp"
 )
@@ -37,32 +34,9 @@ func post_dados(c *gin.Context) {
 		return
 	}
 
-	output := SensorOutput{
-		DeviceID:    input.DeviceID,
-		Timestamp:   input.Timestamp,
-		SensorType:  input.SensorType,
-		ReadingType: input.ReadingType,
-	}
-
-	readingType := strings.ToLower(strings.TrimSpace(input.ReadingType))
-
-	switch readingType {
-
-	case "discreto":
-		output.DiscreteValue = input.Value
-		output.NumericValue = 0
-
-	case "analogica":
-		output.DiscreteValue = "0"
-		numValue, err := strconv.ParseFloat(input.Value, 64)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "valor inválido para reading_type 'analogica'"})
-			return
-		}
-		output.NumericValue = numValue
-
-	default:
-		c.JSON(http.StatusBadRequest, gin.H{"error": "reading_type deve ser 'discreto' ou 'analogica'"})
+	output, err := processarSensor(input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
