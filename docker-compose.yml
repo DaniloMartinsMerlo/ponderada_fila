@@ -1,9 +1,23 @@
 services:
+  back:
+    build:
+      context: ./back
+      dockerfile: dockerfile
+    image: pond_back
+    container_name: pond_back
+    ports:
+      - "8088:8088"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
   db:
     build:
-        context: ./db
-        dockerfile: Dockerfile
-    image: postgres:16 
+      context: ./db
+      dockerfile: dockerfile
+    image: postgres:16
     container_name: pond_db
     environment:
       POSTGRES_USER: admin
@@ -14,6 +28,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d pond_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -23,7 +43,12 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
-
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
 volumes:
   postgres_data:
