@@ -13,12 +13,24 @@ services:
       rabbitmq:
         condition: service_healthy
         
-  consumer:
+  consumer_post:
     build:
-      context: ./middleware
+      context: ./middleware/post
       dockerfile: dockerfile
-    image: consumer
-    container_name: pond_consumer
+    image: consumer_post
+    container_name: pond_consumer_post
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  consumer_get:
+    build:
+      context: ./middleware/get
+      dockerfile: dockerfile
+    image: consumer_get
+    container_name: pond_consumer_get
     depends_on:
       db:
         condition: service_healthy
