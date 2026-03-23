@@ -171,7 +171,7 @@ func TestProcessarSensorAnalogicaValorZero(t *testing.T) {
  
 // ── handler POST /dados (sem RabbitMQ) ───────────────────────────────────────
  
-// configura um router Gin isolado que chama processarSensor mas NÃO publica no RabbitMQ
+// configura um router Gin isolado que chama processarSensor mas não publica no RabbitMQ
 func setupRouterSemRabbit() *gin.Engine {
     gin.SetMode(gin.TestMode)
     r := gin.New()
